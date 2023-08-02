@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import shop.mtcoding.blog.dto.LoginDTO;
-import shop.mtcoding.blog.dto.joinDTO;
+import shop.mtcoding.blog.dto.JoinDTO;
 import shop.mtcoding.blog.model.User;
 import shop.mtcoding.blog.repository.UserRepository;
 
@@ -38,8 +38,8 @@ public class UserController {
         }
 
         // 핵심 기능
-        System.out.println("테스트 : username : " + loginDTO.getUsername());
-        System.out.println("테스트 : password : " + loginDTO.getPassword());
+        // System.out.println("테스트 : username : " + loginDTO.getUsername());
+        // System.out.println("테스트 : password : " + loginDTO.getPassword());
 
         try {
             User user = userRepository.findByUsernameAndPassword(loginDTO);
@@ -52,7 +52,11 @@ public class UserController {
 
     @GetMapping("/joinForm")
     public String joinForm() {
-        return "user/joinForm";
+
+        // templates/
+        // .mustache
+        // templates//user/joinForm.mustache
+        return "user/joinForm"; // ViewResolver
     }
 
     @GetMapping("/loginForm")
@@ -71,19 +75,28 @@ public class UserController {
         return "redirect:/";
     }
 
+    // 실무
     @PostMapping("/join")
-    public void join(joinDTO joinDTO, HttpServletResponse response) throws IOException {
+    public String join(JoinDTO joinDTO) {
+
+        // validation check (유효성 검사)
         if (joinDTO.getUsername() == null || joinDTO.getUsername().isEmpty()) {
-            response.sendRedirect("/40x");
+            return "redirect:/40x";
         }
         if (joinDTO.getPassword() == null || joinDTO.getPassword().isEmpty()) {
-            response.sendRedirect("/40x");
+            return "redirect:/40x";
         }
         if (joinDTO.getEmail() == null || joinDTO.getEmail().isEmpty()) {
-            response.sendRedirect("/40x");
+            return "redirect:/40x";
         }
-        userRepository.save(joinDTO);
-        response.sendRedirect("/loginForm");
+
+        try {
+            userRepository.save(joinDTO); // 핵심 기능
+        } catch (Exception e) {
+            return "redirect:/50x";
+        }
+
+        return "redirect:/loginForm";
     }
 
 }

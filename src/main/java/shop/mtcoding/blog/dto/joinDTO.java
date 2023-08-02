@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter @AllArgsConstructor
-public class joinDTO {
+@Getter
+@Setter
+@AllArgsConstructor
+public class JoinDTO {
     private String username;
     private String password;
     private String email;

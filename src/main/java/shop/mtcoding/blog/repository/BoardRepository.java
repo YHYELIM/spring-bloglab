@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import shop.mtcoding.blog.dto.UpdateDTO;
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
 
@@ -24,6 +25,14 @@ public class BoardRepository {
     // Object[]로 리턴도미
     // object[0]=1
     // object[1]=제목1
+
+    @Transactional
+    public void deleteById(int id) {
+        Query query = em.createNativeQuery("delete * from board_tb where id = :id");
+        query.setParameter("id", id);
+        query.executeUpdate();
+
+    }
 
     public int count() {
         // 엔티티 타입이 아니어도 기본자료형 리턴 안되더라
@@ -56,5 +65,21 @@ public class BoardRepository {
         query.setParameter("content", writeDTO.getContent());
         query.setParameter("userId", userId);
         query.executeUpdate();
+    }
+
+    public Board findById(Integer id) {
+        Query query = em.createNativeQuery("select * from board_tb where id = :id", Board.class);
+        query.setParameter("id", id);
+        Board board = (Board) query.getSingleResult();
+        return board;
+    }
+
+    public void update(UpdateDTO updateDTO, Integer id) {
+        Query query = em.createNativeQuery("delete from board_tb where id = :id");
+        query.setParameter("id", id);
+        query.setParameter("title", updateDTO.getTitle());
+        query.setParameter("content", updateDTO.getContent());
+        query.executeUpdate();
+
     }
 }

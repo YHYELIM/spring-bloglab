@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import shop.mtcoding.blog.dto.LoginDTO;
-import shop.mtcoding.blog.dto.joinDTO;
+import shop.mtcoding.blog.dto.JoinDTO;
 import shop.mtcoding.blog.model.User;
 
 //boardController , UserController, UserRepository
@@ -29,7 +29,7 @@ public class UserRepository {
     }
 
     @Transactional
-    public void save(joinDTO joinDTO) {
+    public void save(JoinDTO joinDTO) {
         Query query = em
                 .createNativeQuery("insert into user_tb(username,password,email) values(:username,:password,:email)");
         query.setParameter("username", joinDTO.getUsername());

@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.mysql.cj.Query;
-
+import shop.mtcoding.blog.dto.UpdateDTO;
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
 import shop.mtcoding.blog.model.User;
@@ -32,13 +31,61 @@ public class BoardController {
     // 리퀘스트 파람 디폴트 값을 0으로 설정하려고
     // 최초에 무조건 0이 들어간다
 
+    // 1.PathVariable 값 받기
+    // 2.인증검사(로그인페이지 보내기)
+    // ->session에 접근해서 sessionUser 키값을 가져오세요
+    // null 이면 로그인페이지로 보내고
+    // null 아니면 3번 실행하세요
+    // 3.모델에 접근해서 삭제 delete from board_tb where id = :id
+    // boardRepository.deleteById(id);호출
+
+    @PostMapping("/board/{id}/update")
+    public String update(@PathVariable Integer id, UpdateDTO updateDTO) {
+        // 1. 인증검사
+        // 2. 권한체크
+        // 3. 핵심로직
+        // update board_tb set title = :title, content = :content where id = :id
+        boardRepository.update(updateDTO, id);
+
+        return "redirect:/board/" + id;
+        // 응답해줄 뷰
+
+    }
+
+    @GetMapping("board/{id}/updateForm")
+    public String updateForm(@PathVariable Integer id, HttpServletRequest request) {
+
+        // 1. 인증 검사
+
+        // 2. 권한 체크
+
+        // 3.핵심 로직
+        Board board = boardRepository.findById(id);
+        request.setAttribute("board", board);
+
+        return "board/updateForm";
+
+    }
+
+    @PostMapping("/board/{id}/delete")
+    public String delete(@PathVariable Integer id) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null) {
+            return "redirect:/loginForm";
+        }
+
+        boardRepository.deleteById(id);
+
+        return "redirect:/";
+    }
+
     // 페이징 하는 법
     @GetMapping({ "/", "/board" })
     public String index(@RequestParam(defaultValue = "0") Integer page, HttpServletRequest request) {
         // 1. 유효성 검사 x - 받을 데이터가 없으니까
         // 2. 인증검사 x
         List<Board> boardList = boardRepository.findAll(page); // page=1
-        System.out.println("테스트:totalCont :");
+
         int totalCount = boardRepository.count();// totalCount=5
         int totalPage = totalCount / 3;// totalPage=1
         if (totalCount % 3 > 0) {
@@ -90,7 +137,20 @@ public class BoardController {
     }
 
     @GetMapping("/board/{id}")
-    public String detail(@PathVariable Integer id) {
-        return "board/detail";
+    public String detail(@PathVariable Integer id, HttpServletRequest request) { // C
+        User sessionUser = (User) session.getAttribute("sessionUser");// 세션 접근
+
+        Board board = boardRepository.findById(id); // M
+
+        boolean pageOwner = false;
+        if (sessionUser != null) {
+            pageOwner = sessionUser.getId() == board.getUser().getId();
+        }
+
+        request.setAttribute("board", board);
+
+        request.setAttribute("pageOwner", pageOwner);
+
+        return "board/detail";// V
     }
 }
