@@ -8,20 +8,87 @@
     <div class="card">
         <div class="card-header"><b>회원가입을 해주세요</b></div>
         <div class="card-body">
-            <form action="/join" method="post" enctype="application/x-www-form-urlencoded">
+            <form action="/join" method="post" enctype="application/x-www-form-urlencoded" onsubmit="return valid()">
+                <!--valid()를 반드시 한번 실행하고 submit을 탐-->
+                <!-- 자스 함수에서 false를 하면 return이 안됨-->>
+                <!-- return이 트루면 submit돼서 컨트롤러 때림-->>
+
+                <!-- 그래서 프론트 입장에서는 여기 valid()에사 유효성 검사를 한다-->>
+                <!-- required 만으로는 안된다-->>
+                
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Enter username" name="username" required maxlength="20">
+                    <input type="text" id="username" class="form-control" placeholder="Enter username" name="username" required maxlength="20">
                 </div>
+                <button type ="button" onclick="check()">중복체크</button>
                 <div class="mb-3">
                     <input type="password" class="form-control" placeholder="Enter password" name="password" required maxlength="20">
                 </div>
                 <div class="mb-3">
                     <input type="email" class="form-control" placeholder="Enter email" name="email" required maxlength="20">
                 </div>
-                <button type="submit" class="btn btn-primary form-control">회원가입</button>
+                <button id="btnJoin" type="submit"  class="btn btn-primary form-control disabled">회원가입</button>
+                <!--최초 회원가입 버튼을 막는다-->
+                
             </form>
         </div>
     </div>
 </div>
+<script>
+    let usernameSameCheck = false;//밖에 선언해서 check(),sumit()사용 가능
+    function valid(){
+        if(usernameSameCheck ){
+            return true;
+
+        }else{
+            alert("유저네임 중복체크")
+
+        }return false;
+    }
+    //책임 : input태그로 부터 username을 가져와서 통신을 요청하고, 중복이 되었는지 확인한다.
+    async function check() {
+       //1.DOM으로 부터 값 가져오기
+    let username = document.querySelector("#username").value;
+    console.log("유저네임", username);
+
+    //2. 통신요청
+    let response = await fetch(`/check?username=${username}`);
+    // 이렇게 요청 백틱을 써야 달러 사용가능
+    //await없는 통신을 담은 response에는 null이 들어온다 ->통신이 아직 완료되지 않았으니까
+    //await: 기다렸다가 다운 완료되면 response에 값 넣어라 그러면 null이 아님 -> function 앞에 async 붙여줘야 오류 안난다
+    //이렇게 되면 5초 후에 뜰거다
+    //http의 헤더와 바디가 다 있다
+    //바디를 항상 파싱할 필요는 없지 바디가 있으면 파싱한다
+    
+
+      //3. 파싱-> 반드시 통신의 결과는 파싱되어야 한다
+      //바디데이터를 파싱-> 컨트롤러의 요청을 보고 확인
+      let responseBody = response.text();//resoponse.json();
+    //"중복되었습니다"로 응답하니까 plain형태니까 .text()
+    //보통 json으로 하지만 우리는 지금 plain으로 함
+
+
+    //파싱이 먼저 되어야 상태코드 확인을 던질수 있지
+    //4. 상태 코드 확인
+    let btnJoin = document.querySelector("#btnJoin");
+    if(response.status == 200){
+        alert(responseBody);
+        usernameSameCheck = true;
+       
+        
+    }else{
+        alert(responseBody);
+        usernameSameCheck = false;
+
+    }
+
+    //5. 비즈니스 로직
+
+    
+    // 오래걸리는 것들은 이벤트큐에 등록
+    //할 일이 없을때 이벤트큐에 감
+
+       
+    }
+</script>
 
 {{> /layout/footer}}

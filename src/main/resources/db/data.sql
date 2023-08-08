@@ -5,3 +5,5 @@ insert into board_tb(title, content, user_id, created_at) values('제목2', '내
 insert into board_tb(title, content, user_id, created_at) values('제목3', '내용3', 1, now());
 insert into board_tb(title, content, user_id, created_at) values('제목4', '내용4', 2, now());
 insert into board_tb(title, content, user_id, created_at) values('제목5', '내용5', 2, now());
+insert into reply_tb(board_id, user_id, comment)values(1, 1, '댓글1');
+insert into reply_tb(board_id, user_id, comment)values(2, 2, '댓글2');

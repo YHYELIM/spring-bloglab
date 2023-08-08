@@ -11,12 +11,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import shop.mtcoding.blog.dto.BoardDetailDTO;
 import shop.mtcoding.blog.dto.UpdateDTO;
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
+import shop.mtcoding.blog.model.Reply;
 import shop.mtcoding.blog.model.User;
 import shop.mtcoding.blog.repository.BoardRepository;
+import shop.mtcoding.blog.repository.ReplyRepository;
 
 @Controller
 public class BoardController {
@@ -26,6 +30,9 @@ public class BoardController {
 
     @Autowired
     private BoardRepository boardRepository;
+
+    @Autowired
+    private ReplyRepository replyRepository;
 
     // 주소 두개 쓰려면 중괄호로 맵핑
     // 리퀘스트 파람 디폴트 값을 0으로 설정하려고
@@ -93,8 +100,8 @@ public class BoardController {
         }
         boolean last = totalPage - 1 == page;
 
-        System.out.println("테스트 :" + boardList.size());
-        System.out.println("테스트 :" + boardList.get(0).getTitle());
+        // System.out.println("테스트 :" + boardList.size());
+        // System.out.println("테스트 :" + boardList.get(0).getTitle());
 
         request.setAttribute("boardList", boardList);
         request.setAttribute("prevPage", page - 1);
@@ -139,18 +146,25 @@ public class BoardController {
     @GetMapping("/board/{id}")
     public String detail(@PathVariable Integer id, HttpServletRequest request) { // C
         User sessionUser = (User) session.getAttribute("sessionUser");// 세션 접근
-
-        Board board = boardRepository.findById(id); // M
+        List<BoardDetailDTO> dtos = boardRepository.findByIdJoinReply(id); // M
 
         boolean pageOwner = false;
         if (sessionUser != null) {
-            pageOwner = sessionUser.getId() == board.getUser().getId();
+            pageOwner = sessionUser.getId() == dtos.get(0).getBoardUserId();
         }
 
-        request.setAttribute("board", board);
+        request.setAttribute("dtos", dtos);
 
         request.setAttribute("pageOwner", pageOwner);
 
         return "board/detail";// V
     }
+
+    @ResponseBody
+    @GetMapping("/test/reply")
+    public List<Reply> test2() {
+        List<Reply> replys = replyRepository.findByBoardId(1);
+        return replys;
+    }
+
 }

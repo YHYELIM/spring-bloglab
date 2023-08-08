@@ -13,11 +13,11 @@ public class ErrorController {
 
     @GetMapping("/40x")
     public String ex40x() {
-        return "error/ex40x";
+        return "error/40x";
     }
 
     @GetMapping("/50x")
     public String ex50x() {
-        return "error/ex50x";
+        return "error/50x";
     }
 }

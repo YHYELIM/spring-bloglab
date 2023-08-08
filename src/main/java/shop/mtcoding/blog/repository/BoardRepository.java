@@ -6,10 +6,12 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import shop.mtcoding.blog.dto.BoardDetailDTO;
 import shop.mtcoding.blog.dto.UpdateDTO;
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
@@ -67,12 +69,40 @@ public class BoardRepository {
         query.executeUpdate();
     }
 
+    // 한 방쿼리 넣는 곳
+    public List<BoardDetailDTO> findByIdJoinReply(int boardId) {
+
+        String sql = "select";
+        sql += "b.id board_id, ";
+        sql += "b.content board_content, ";
+        sql += "b.title board_title, ";
+        sql += "b.user_id board_user_id, ";
+        sql += "r.id reply_id, ";
+        sql += "r.comment reply_comment, ";
+        sql += "r.user_id reply_user_id, ";
+        sql += "ru.username reply_user_username, ";
+        sql += "from board_tb b left outer join reply_tb r, ";
+        sql += "on b.id = r.board_id, ";
+        sql += "left outer join user_tb ru, ";
+        sql += "on r.user_id = ru.id, ";
+        sql += "where b.id = :boardId ";
+        sql += "order by r.id desc";
+        Query query = em.createNativeQuery(sql);
+        query.setParameter("boardId", boardId);
+
+        JpaResultMapper mapper = new JpaResultMapper();
+        // → jparesultmapper: 자동으로 맵핑해줌(qlrm 라이브러리)
+        List<BoardDetailDTO> dtos = mapper.list(query, BoardDetailDTO.class);
+        return dtos;
+
+    }
+
     public Board findById(Integer id) {
         Query query = em.createNativeQuery("select * from board_tb where id = :id", Board.class);
         query.setParameter("id", id);
         Board board = (Board) query.getSingleResult();
         return board;
-    }
+    }// 상세보기 할때 얘로 썼음
 
     public void update(UpdateDTO updateDTO, Integer id) {
         Query query = em.createNativeQuery("delete from board_tb where id = :id");
