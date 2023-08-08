@@ -41,6 +41,7 @@ public class ReplyRepository {
         // 쿼리완성
 
         query.executeUpdate();
+
         // 쿼리 전송
     }
 

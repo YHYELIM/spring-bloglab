@@ -25,7 +25,7 @@ public class Reply {
     @Id
     private Integer id;
 
-    @Column(nullable = false, length = 50) // null값 허용 안함
+    @Column(nullable = false, length = 100) // null값 허용 안함
     private String comment;// 댓글내용
 
     @JoinColumn(name = "user_id")

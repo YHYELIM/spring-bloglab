@@ -1,6 +1,5 @@
 package shop.mtcoding.blog.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@AllArgsConstructor
+
 public class WriteDTO {
     private String title;
     private String content;

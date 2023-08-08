@@ -42,18 +42,20 @@ public class UserRepository {
 
     @Transactional
     public void save(JoinDTO joinDTO) {
-        System.out.println("테스트 :" + 1);
+
         // 어디까지 실행됐는지 궁금하면 번호를 곳곳에 찍어 본다
         // 앞에 테스트 했던 것들은 주석 처리 해줘야 한 눈에 알아볼수있다
         Query query = em
                 .createNativeQuery("insert into user_tb(username,password,email) values(:username,:password,:email)");
-        System.out.println("테스트 :" + 2);
+
         query.setParameter("username", joinDTO.getUsername());
         query.setParameter("password", joinDTO.getPassword());
         query.setParameter("email", joinDTO.getEmail());
-        System.out.println("테스트 :" + 3);
+        System.out.println("테스트1");
+
         query.executeUpdate();// 쿼리를 전송 (dbms 한테)
-        System.out.println("테스트 :" + 4);
+        System.out.println("테스트2");
+
     }
 
 }

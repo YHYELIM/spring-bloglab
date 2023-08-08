@@ -45,9 +45,9 @@ public class UserController {
         User user = userRepository.findByUsername(username);
         if (user != null) {
 
-            return new ResponseEntity<>("중복됨", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<String>("중복됨", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("중복되지 않음", HttpStatus.OK);
+        return new ResponseEntity<String>("중복되지 않음", HttpStatus.OK);
 
         // 상태코드 보낼때 사용
         // 스프링은 기본적으로 200을 던져줌

@@ -10,11 +10,11 @@
         <div class="card-body">
             <form action="/join" method="post" enctype="application/x-www-form-urlencoded" onsubmit="return valid()">
                 <!--valid()를 반드시 한번 실행하고 submit을 탐-->
-                <!-- 자스 함수에서 false를 하면 return이 안됨-->>
-                <!-- return이 트루면 submit돼서 컨트롤러 때림-->>
+                <!-- 자스 함수에서 false를 하면 return이 안됨-->
+                <!-- return이 트루면 submit돼서 컨트롤러 때림-->
 
-                <!-- 그래서 프론트 입장에서는 여기 valid()에사 유효성 검사를 한다-->>
-                <!-- required 만으로는 안된다-->>
+                <!-- 그래서 프론트 입장에서는 여기 valid()에사 유효성 검사를 한다-->
+                <!-- required 만으로는 안된다-->
                 
                 <div class="mb-3">
                     <input type="text" id="username" class="form-control" placeholder="Enter username" name="username" required maxlength="20">
@@ -38,11 +38,10 @@
     function valid(){
         if(usernameSameCheck ){
             return true;
-
         }else{
-            alert("유저네임 중복체크")
-
-        }return false;
+            alert("유저네임 중복체크");
+            return false;
+        }
     }
     //책임 : input태그로 부터 username을 가져와서 통신을 요청하고, 중복이 되었는지 확인한다.
     async function check() {
@@ -62,7 +61,7 @@
 
       //3. 파싱-> 반드시 통신의 결과는 파싱되어야 한다
       //바디데이터를 파싱-> 컨트롤러의 요청을 보고 확인
-      let responseBody = response.text();//resoponse.json();
+      let responseBody = await response.text();//resoponse.json();
     //"중복되었습니다"로 응답하니까 plain형태니까 .text()
     //보통 json으로 하지만 우리는 지금 plain으로 함
 

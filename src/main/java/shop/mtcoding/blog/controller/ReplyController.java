@@ -22,14 +22,17 @@ public class ReplyController {
     @PostMapping("/reply/save")
     public String save(ReplyWriteDTO replyWriteDTO) {// x-www폼으로 들어옴
         // comment 유효성 검사: 값이 있는지 없는지
-
+        if (replyWriteDTO.getBoardId() == null) {
+            return "redirect:/40x";
+        }
         if (replyWriteDTO.getComment() == null || replyWriteDTO.getComment().isEmpty()) {
             return "redirect:/40x";
         }
-
         // 인증 검사
+        System.out.println("테스트1");
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser != null) {
+        System.out.println("테스트2" + sessionUser);
+        if (sessionUser == null) {
             return "redirect:/loginForm";
         }
 

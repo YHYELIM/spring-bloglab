@@ -15,6 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UpdateDTO {
+    private int id;
     private String title;
     private String content;
 
