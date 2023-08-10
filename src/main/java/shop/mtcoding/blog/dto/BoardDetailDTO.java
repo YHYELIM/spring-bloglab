@@ -19,7 +19,7 @@ public class BoardDetailDTO {
     private boolean replyOwner; // DB에서 만들어 오세요
 
     public BoardDetailDTO(Integer boardId, String boardContent, String boardTitle, Integer boardUserId, Integer replyId,
-            String replyComment, Integer replyUserId, String replyUserUsername) {
+            String replyComment, Integer replyUserId, String replyUserUsername, boolean replyOwner) {
         this.boardId = boardId;
         this.boardContent = boardContent;
         this.boardTitle = boardTitle;
@@ -29,6 +29,7 @@ public class BoardDetailDTO {
         this.replyUserId = replyUserId;
         this.replyUserUsername = replyUserUsername;
         this.replyOwner = replyOwner;
+        // true면 보이게 하고 false면 안보이게 한다
     }
 
 }

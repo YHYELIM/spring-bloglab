@@ -2,9 +2,11 @@ package shop.mtcoding.blog.controller;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import shop.mtcoding.blog.dto.LoginDTO;
+import shop.mtcoding.blog.dto.UpdateDTO;
+import shop.mtcoding.blog.dto.UserUpdateDTO;
 import shop.mtcoding.blog.dto.JoinDTO;
 import shop.mtcoding.blog.model.User;
 import shop.mtcoding.blog.repository.UserRepository;
@@ -28,6 +32,8 @@ public class UserController {
     private HttpSession session;
     // request 가방 session 서랍
     // session에 데이터 보관 가능
+
+    private String username;
 
     // localhost:8080/check?username=ssar
     // 중복되는게 있다
@@ -47,6 +53,7 @@ public class UserController {
 
             return new ResponseEntity<String>("중복됨", HttpStatus.BAD_REQUEST);
         }
+
         return new ResponseEntity<String>("중복되지 않음", HttpStatus.OK);
 
         // 상태코드 보낼때 사용
@@ -72,12 +79,18 @@ public class UserController {
         // System.out.println("테스트 : password : " + loginDTO.getPassword());
 
         try {
-            User user = userRepository.findByUsernameAndPassword(loginDTO);
-            session.setAttribute("sessionUser", user);
-            return "redirect:/";
+            User user = userRepository.findByUsername(loginDTO.getUsername());
+            boolean isValid = BCrypt.checkpw(loginDTO.getPassword(), user.getEncPassword());
+            if (isValid) {
+                session.setAttribute("sessionUser", user);
+                return "redirect:/";
+            } else {
+                return "redirect:/loginForm";
+            }
         } catch (Exception e) {
             return "redirect:/exLogin";
         }
+
     }
 
     @GetMapping("/joinForm")
@@ -94,8 +107,31 @@ public class UserController {
         return "user/loginForm";
     }
 
-    @GetMapping("/user/updateForm")
-    public String updateForm() {
+    // @PostMapping("/user/update")
+    // public String update(UserUpdateDTO userUpdateDTO) {
+    // // 인증 검사
+    // User sessionUser = (User) session.getAttribute("sessionUser");
+    // if (sessionUser == null) {
+    // return "redirect:/login";
+    // }
+
+    // 핵심 로직
+
+    @GetMapping("/updateForm")
+    public String updateForm(HttpServletRequest request) {
+        // session 정보를 가져온다
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        // sessionUser정보가 없으면 로그인 페이지로 이동
+        if (sessionUser == null) {
+            return "redirect:/loginForm"; // 401
+        }
+
+        // username을 걸지 않는 이유는 pk가 아니기 때문에 index를 타지 않는다(uk도 index를 탄다)
+        // index = 목차-> 목차이기 때문에 풀 엑세를 하지 않는다
+
+        User user = userRepository.findByUsername(sessionUser.getUsername());
+        request.setAttribute("user", user);
+
         return "user/updateForm";
     }
 
@@ -112,7 +148,7 @@ public class UserController {
         if (joinDTO.getUsername() == null || joinDTO.getUsername().isEmpty()) {
             return "redirect:/40x";
         }
-        if (joinDTO.getPassword() == null || joinDTO.getPassword().isEmpty()) {
+        if (joinDTO.getEncPassword() == null || joinDTO.getEncPassword().isEmpty()) {
             return "redirect:/40x";
         }
         if (joinDTO.getEmail() == null || joinDTO.getEmail().isEmpty()) {
@@ -123,6 +159,10 @@ public class UserController {
         if (user != null) {
             return "redirect:/50x";
         }
+        String encPassword = BCrypt.hashpw(joinDTO.getEncPassword(), BCrypt.gensalt());
+        joinDTO.setEncPassword(encPassword);
+        // System.out.println("테스트1" + encPassword);
+
         userRepository.save(joinDTO); // 핵심 기능
         return "redirect:/loginForm";
     }// 얘도 중복확인을 해야하는게 포스트맨으로 공격받을수 있다

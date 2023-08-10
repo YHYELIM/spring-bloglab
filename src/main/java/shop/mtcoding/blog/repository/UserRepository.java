@@ -3,6 +3,7 @@ package shop.mtcoding.blog.repository;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class UserRepository {
             return (User) query.getSingleResult();
         } catch (Exception e) {
             return null;
+            // NoException e 지만 exception이 부모니까 상관없다
 
         }
 
@@ -46,15 +48,16 @@ public class UserRepository {
         // 어디까지 실행됐는지 궁금하면 번호를 곳곳에 찍어 본다
         // 앞에 테스트 했던 것들은 주석 처리 해줘야 한 눈에 알아볼수있다
         Query query = em
-                .createNativeQuery("insert into user_tb(username,password,email) values(:username,:password,:email)");
+                .createNativeQuery(
+                        "insert into user_tb(username,enc_password,email) values(:username,:encPassword,:email)");
 
         query.setParameter("username", joinDTO.getUsername());
-        query.setParameter("password", joinDTO.getPassword());
+        query.setParameter("enc_password", joinDTO.getEncPassword());
+        System.out.println("테스트 2:" + joinDTO.getEncPassword());
         query.setParameter("email", joinDTO.getEmail());
-        System.out.println("테스트1");
-
+        // System.out.println("테스트1");
         query.executeUpdate();// 쿼리를 전송 (dbms 한테)
-        System.out.println("테스트2");
+        // System.out.println("테스트2");
 
     }
 

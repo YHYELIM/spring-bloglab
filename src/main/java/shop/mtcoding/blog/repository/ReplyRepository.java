@@ -24,7 +24,19 @@ public class ReplyRepository {
     @Autowired
     private EntityManager em;
 
+    public Reply findById(int id) {
+        Query query = em.createNativeQuery("select * from reply_tb where id = :id", Reply.class);
+        // 이걸 적으면 쿼리에 그대로 오브젝트 맵핑해줌
+        // 굳이 디티오로 조회하지 않아도 되
+        // 모델로 받는게 최고다 편하니까
+        query.setParameter("id", id);
+        return (Reply) query.getSingleResult();
+        // 리턴 아래에는 테스트용 로고를 찍을수없다
+        // 리턴은 항상 마지막이 되어야함
+    }
+
     public List<Reply> findByBoardId(Integer boardId) {
+
         Query query = em.createNativeQuery("select * from reply_tb where board_id = :boardId", Reply.class);
         query.setParameter("boardId", boardId);
         return query.getResultList();
@@ -47,11 +59,16 @@ public class ReplyRepository {
 
     public void update(ReplyWriteDTO replyWriteDTO, Integer id) {
         Query query = em.createNativeQuery("delete from reply_tb where id = :id");
-        query.setParameter("id", id);
-        query.setParameter("board_id", replyWriteDTO.getBoardId());
-        query.setParameter("comment", replyWriteDTO.getComment());
-        query.executeUpdate();
 
     }
 
+    @Transactional
+    public void deleteById(Integer id) {
+        Query query = em
+                .createNativeQuery(
+                        "delete from reply_tb where id = :id");
+
+        query.setParameter("id", id);
+        query.executeUpdate();
+    }
 }

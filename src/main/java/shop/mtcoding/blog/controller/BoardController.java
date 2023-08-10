@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import shop.mtcoding.blog.dto.BoardDetailDTO;
+import shop.mtcoding.blog.dto.ReplyWriteDTO;
 import shop.mtcoding.blog.dto.UpdateDTO;
 import shop.mtcoding.blog.dto.WriteDTO;
 import shop.mtcoding.blog.model.Board;
@@ -100,16 +101,34 @@ public class BoardController {
     }
 
     // 페이징 하는 법
+    // http://localhost:8080?num=4
     @GetMapping({ "/", "/board" })
-    public String index(@RequestParam(defaultValue = "0") Integer page, HttpServletRequest request) {
-        // 1. 유효성 검사 x - 받을 데이터가 없으니까
-        // 2. 인증검사 x
-        List<Board> boardList = boardRepository.findAll(page); // page=1
+    public String index(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") Integer page,
+            HttpServletRequest request) {
+        // 1. 유효성 검사 X
+        // 2. 인증검사 X
+        System.out.println("테스트 : keyword : " + keyword);
+        System.out.println("테스트 : keyword length : " + keyword.length());
+        System.out.println("테스트 : keyword isEmpty : " + keyword.isEmpty());
+        System.out.println("테스트 : keyword isBlank : " + keyword.isBlank());
 
-        int totalCount = boardRepository.count();// totalCount=5
-        int totalPage = totalCount / 3;// totalPage=1
+        List<Board> boardList = null;
+        int totalCount = 0;
+        request.setAttribute("keyword", keyword); // 공백 or 값있음
+        if (keyword.isBlank()) {
+            boardList = boardRepository.findAll(page); // page = 1
+            totalCount = boardRepository.count();
+        } else {
+            boardList = boardRepository.findAll(page, keyword); // page = 1
+            totalCount = boardRepository.count(keyword);
+        }
+
+        // System.out.println("테스트 : totalCount :" + totalCount);
+        int totalPage = totalCount / 3; // totalPage = 1
         if (totalCount % 3 > 0) {
-            totalPage = totalPage + 1;// totalPage= 2
+            totalPage = totalPage + 1; // totalPage = 2
         }
         boolean last = totalPage - 1 == page;
 
@@ -156,28 +175,35 @@ public class BoardController {
         return "board/saveForm";
     }
 
+    // localhost:8080/board/1
+    // localhost:8080/board/50
     @GetMapping("/board/{id}")
     public String detail(@PathVariable Integer id, HttpServletRequest request) { // C
-        User sessionUser = (User) session.getAttribute("sessionUser");// 세션 접근
-        List<BoardDetailDTO> dtos = boardRepository.findByIdJoinReply(id); // M
+        User sessionUser = (User) session.getAttribute("sessionUser"); // 세션접근
+        List<BoardDetailDTO> dtos = null;
+        if (sessionUser == null) {
+            dtos = boardRepository.findByIdJoinReply(id, null);
+        } else {
+            dtos = boardRepository.findByIdJoinReply(id, sessionUser.getId());
+        }
 
         boolean pageOwner = false;
         if (sessionUser != null) {
+            // System.out.println("테스트 세션 ID : " + sessionUser.getId());
+            // System.out.println("테스트 세션 board.getUser().getId() : " +
+            // board.getUser().getId());
             pageOwner = sessionUser.getId() == dtos.get(0).getBoardUserId();
+            // System.out.println("테스트 : pageOwner : " + pageOwner);
         }
 
-        request.setAttribute("dtos", dtos);
-
+        request.setAttribute("dtos", dtos);// request가방에 dtos담는다-> 이건 detail.mustache로 담아갈수 있다
         request.setAttribute("pageOwner", pageOwner);
-
-        return "board/detail";// V
+        return "board/detail"; // V
     }
-
-    // @ResponseBody
-    // @GetMapping("/test/reply")
-    // public List<Reply> test2() {
-    // List<Reply> replys = replyRepository.findByBoardId(1);
-    // return replys;
-    // }
-
 }
+// @ResponseBody
+// @GetMapping("/test/reply")
+// public List<Reply> test2() {
+// List<Reply> replys = replyRepository.findByBoardId(1);
+// return replys;
+// }

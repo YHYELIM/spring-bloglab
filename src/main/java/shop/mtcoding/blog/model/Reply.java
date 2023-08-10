@@ -33,6 +33,7 @@ public class Reply {
     private User user;// fk user_id 생김
 
     @ManyToOne
-    private Board board; // fk board_id 생김
+    private Board board;
+    // fk board_id 생김
 
 }

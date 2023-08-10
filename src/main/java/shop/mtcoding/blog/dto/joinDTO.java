@@ -9,6 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class JoinDTO {
     private String username;
-    private String password;
+    private String encPassword;
     private String email;
+
 }

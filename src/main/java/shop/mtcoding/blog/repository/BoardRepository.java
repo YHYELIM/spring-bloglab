@@ -48,12 +48,37 @@ public class BoardRepository {
 
     }
 
+    public int count(String keyword) {
+        // 엔티티 타입이 아니어도 기본자료형 리턴 안되더라
+        // 엔티티가 뭘까 컨트롤 클릭
+        // 그룹바이 쿼리 스트링
+        Query query = em.createNativeQuery("select count (*) from board_tb where title like :keyword");
+        query.setParameter("keyword", "%" + keyword + "%");// 문법지원안되면 이렇게
+        // 원래는 Object 배열로 리턴 받는다 Object 배열은 칼럼의 연속이다
+        // 그룹함수를 써서, 하나의 칼럼을 조회하면, Object 로 리턴된다
+        BigInteger count = (BigInteger) query.getSingleResult();
+        return count.intValue();
+
+    }
+
     // localhost:8080?page=0;
     public List<Board> findAll(int page) {
-        final int SIZE = 4;// 상수는 대문자로 쓴다
-        Query query = em.createNativeQuery("select * from board_tb order by id desc limit :page,:size", Board.class);
+        final int SIZE = 3;
+        Query query = em.createNativeQuery("select * from board_tb order by id desc limit :page, :size", Board.class);
         query.setParameter("page", page * SIZE);
         query.setParameter("size", SIZE);
+        return query.getResultList();
+    }
+
+    // localhost:8080?page=0
+    public List<Board> findAll(int page, String keyword) {
+        final int SIZE = 3;
+        Query query = em.createNativeQuery(
+                "select * from board_tb where title like :keyword order by id desc limit :page, :size", Board.class);
+        query.setParameter("page", page * SIZE);
+        query.setParameter("size", SIZE);
+        query.setParameter("keyword", "%" + keyword + "%");
+
         return query.getResultList();
     }
 
@@ -69,8 +94,9 @@ public class BoardRepository {
         query.executeUpdate();
     }
 
-    // 한 방쿼리 넣는 곳
-    public List<BoardDetailDTO> findByIdJoinReply(int boardId) {
+    // 동적 쿼리 넣는 곳
+    // 상황 마다 달라지는 쿼리
+    public List<BoardDetailDTO> findByIdJoinReply(Integer boardId, Integer sessionUserId) {
         String sql = "select ";
         sql += "b.id board_id, ";
         sql += "b.content board_content, ";
@@ -80,21 +106,27 @@ public class BoardRepository {
         sql += "r.comment reply_comment, ";
         sql += "r.user_id reply_user_id, ";
         sql += "ru.username reply_user_username, ";
+        if (sessionUserId == null) {
+            sql += "false reply_owner ";
+        } else {
+            sql += "case when r.user_id = :sessionUserId then true else false end reply_owner ";
+        }
+
         sql += "from board_tb b left outer join reply_tb r ";
         sql += "on b.id = r.board_id ";
         sql += "left outer join user_tb ru ";
         sql += "on r.user_id = ru.id ";
         sql += "where b.id = :boardId ";
         sql += "order by r.id desc";
-
         Query query = em.createNativeQuery(sql);
         query.setParameter("boardId", boardId);
+        if (sessionUserId != null) {
+            query.setParameter("sessionUserId", sessionUserId);
+        }
+
         JpaResultMapper mapper = new JpaResultMapper();
-        // → jparesultmapper: 자동으로 맵핑해줌(qlrm 라이브러리)
         List<BoardDetailDTO> dtos = mapper.list(query, BoardDetailDTO.class);
-
         return dtos;
-
     }
 
     public Board findById(Integer id) {
